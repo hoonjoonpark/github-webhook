@@ -5,7 +5,7 @@ branches:
 workdir: /home/hjpark/github-webhook
 commands:
   - git pull --ff-only origin ${TARGET_BRANCH}
-  - /home/hjpark/Envs/github-webhook/bin/pip install -r requirements.txt
+  - /home/hjpark/.envs/github-webhook/bin/pip install -r requirements.txt
   - sudo systemctl restart github-webhook
 env: {}
 notify: true

@@ -60,7 +60,7 @@ branches:
 workdir: /home/hjpark/github-webhook
 commands:
   - git pull --ff-only origin main
-  - /home/hjpark/Envs/github-webhook/bin/pip install -r requirements.txt
+  - /home/hjpark/.envs/github-webhook/bin/pip install -r requirements.txt
   - sudo systemctl restart github-webhook
 env: {}
 ```
@@ -99,7 +99,7 @@ Type=simple
 User=hjpark
 WorkingDirectory=/home/hjpark/github-webhook
 EnvironmentFile=/home/hjpark/github-webhook/.env
-ExecStart=/usr/bin/env /home/hjpark/Envs/github-webhook/bin/python /home/hjpark/github-webhook/webhook.py
+ExecStart=/usr/bin/env /home/hjpark/.envs/github-webhook/bin/python /home/hjpark/github-webhook/webhook.py
 Restart=always
 RestartSec=3
 
