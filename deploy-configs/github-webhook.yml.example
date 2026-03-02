@@ -2,15 +2,15 @@ name: github-webhook-self
 repository: ${TARGET_REPOSITORY}
 branches:
   - ${TARGET_BRANCH}
-workdir: /workspace
+workdir: /home/hjpark/github-webhook
 commands:
-  - ./scripts/deploy-local-registry.sh
+  - /home/hjpark/github-webhook/scripts/deploy-local-registry.sh
 env:
   IMAGE_NAME: ${IMAGE_NAME}
   IMAGE_TAG: ${SERVER_TAG}
   BUILD_PLATFORM: ${BUILD_PLATFORM}
-  ROOT_DIR: /workspace
-  BUILD_CONTEXT: /workspace
-  DOCKERFILE_PATH: /workspace/Dockerfile
-  COMPOSE_FILE: /workspace/docker-compose.yml
+  ROOT_DIR: /home/hjpark/github-webhook
+  BUILD_CONTEXT: /home/hjpark/github-webhook
+  DOCKERFILE_PATH: /home/hjpark/github-webhook/Dockerfile
+  COMPOSE_FILE: /home/hjpark/github-webhook/docker-compose.yml
   SERVICE_NAME: github-webhook

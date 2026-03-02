@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    working_dir: /workspace
+    working_dir: /home/hjpark/github-webhook
     ports:
       - "9000:9000"
     volumes:
-      - .:/workspace
+      - .:/home/hjpark/github-webhook
       - /var/run/docker.sock:/var/run/docker.sock
