@@ -4,13 +4,9 @@ branches:
   - ${TARGET_BRANCH}
 workdir: /home/hjpark/github-webhook
 commands:
-  - /home/hjpark/github-webhook/scripts/deploy-local-registry.sh
-env:
-  IMAGE_NAME: ${IMAGE_NAME}
-  IMAGE_TAG: ${SERVER_TAG}
-  BUILD_PLATFORM: ${BUILD_PLATFORM}
-  ROOT_DIR: /home/hjpark/github-webhook
-  BUILD_CONTEXT: /home/hjpark/github-webhook
-  DOCKERFILE_PATH: /home/hjpark/github-webhook/Dockerfile
-  COMPOSE_FILE: /home/hjpark/github-webhook/docker-compose.yml
-  SERVICE_NAME: github-webhook
+  - git pull --ff-only origin ${TARGET_BRANCH}
+  - /home/hjpark/Envs/github-webhook/bin/pip install -r requirements.txt
+  - sudo systemctl restart github-webhook
+env: {}
+notify: true
+enabled: true

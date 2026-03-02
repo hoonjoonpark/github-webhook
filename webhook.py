@@ -27,6 +27,8 @@ CONFIG_DIR = Path(os.environ.get("CONFIG_DIR", "deploy-configs")).expanduser()
 BOT_ENDPOINT = os.environ.get("BOT_ENDPOINT", "").strip()
 REQUEST_TIMEOUT = float(os.environ.get("REQUEST_TIMEOUT", "10"))
 DEFAULT_SHELL = os.environ.get("DEPLOY_SHELL", "bash")
+DEFAULT_HOST = os.environ.get("HOST", "127.0.0.1")
+DEFAULT_PORT = int(os.environ.get("PORT", "9000"))
 
 app = FastAPI(title="GitHub App Webhook")
 _target_locks: dict[str, threading.Lock] = {}
@@ -197,6 +199,15 @@ def run_target(target: DeploymentTarget, context: dict[str, str]) -> None:
         logger.info(done_message)
         if target.notify:
             send_bot_message(done_message)
+    except subprocess.CalledProcessError as exc:
+        if exc.stdout:
+            logger.error("target=%s stdout\n%s", target.name, exc.stdout.strip())
+        if exc.stderr:
+            logger.error("target=%s stderr\n%s", target.name, exc.stderr.strip())
+        failed_message = f"[deploy] failed target={target.name} delivery={context['DELIVERY_ID']} exit={exc.returncode}"
+        logger.exception(failed_message)
+        if target.notify:
+            send_bot_message(failed_message)
     except Exception as exc:
         failed_message = f"[deploy] failed target={target.name} delivery={context['DELIVERY_ID']} err={exc}"
         logger.exception(failed_message)
@@ -279,3 +290,9 @@ async def github_webhook(request: Request, background: BackgroundTasks) -> Plain
         ",".join(target.name for target in matches),
     )
     return PlainTextResponse("ok", status_code=200)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("webhook:app", host=DEFAULT_HOST, port=DEFAULT_PORT)

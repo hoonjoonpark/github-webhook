@@ -1,0 +1,19 @@
+name: sample-docker-app
+repository: my-org/my-app
+branches:
+  - main
+workdir: /home/hjpark/my-app
+commands:
+  - /home/hjpark/github-webhook/scripts/deploy-local-registry.sh
+env:
+  IMAGE_NAME: bth.local:5000/my-app
+  IMAGE_TAG: latest
+  BUILD_PLATFORM: linux/amd64
+  ROOT_DIR: /home/hjpark/my-app
+  BUILD_CONTEXT: /home/hjpark/my-app
+  DOCKERFILE_PATH: /home/hjpark/my-app/Dockerfile
+  COMPOSE_FILE: /home/hjpark/my-app/docker-compose.yml
+  SERVICE_NAME: my-app
+  RUN_COMPOSE: "1"
+notify: true
+enabled: true
