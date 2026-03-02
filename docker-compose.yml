@@ -1,0 +1,13 @@
+services:
+  github-webhook:
+    image: ${IMAGE_NAME:-bth.local:5000/github-webhook}:${SERVER_TAG:-latest}
+    container_name: github-webhook
+    restart: unless-stopped
+    env_file:
+      - .env
+    working_dir: /workspace
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -1,0 +1,16 @@
+name: github-webhook-self
+repository: ${TARGET_REPOSITORY}
+branches:
+  - ${TARGET_BRANCH}
+workdir: /workspace
+commands:
+  - ./scripts/deploy-local-registry.sh
+env:
+  IMAGE_NAME: ${IMAGE_NAME}
+  IMAGE_TAG: ${SERVER_TAG}
+  BUILD_PLATFORM: ${BUILD_PLATFORM}
+  ROOT_DIR: /workspace
+  BUILD_CONTEXT: /workspace
+  DOCKERFILE_PATH: /workspace/Dockerfile
+  COMPOSE_FILE: /workspace/docker-compose.yml
+  SERVICE_NAME: github-webhook
