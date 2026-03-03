@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import hashlib
 import hmac
 import json
@@ -69,7 +70,7 @@ def send_bot_message(message: str) -> None:
     try:
         response = requests.post(
             BOT_ENDPOINT,
-            json={"message": message},
+            json={"message": message, "parse_mode": "HTML"},
             timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
@@ -159,12 +160,37 @@ def get_target_lock(target_name: str) -> threading.Lock:
         return _target_locks.setdefault(target_name, threading.Lock())
 
 
+def format_bot_message(
+    status: str,
+    target: DeploymentTarget,
+    context: dict[str, str],
+    extra: str | None = None,
+) -> str:
+    title_map = {
+        "start": "Deploy Started",
+        "done": "Deploy Succeeded",
+        "failed": "Deploy Failed",
+        "skipped": "Deploy Skipped",
+    }
+    title = title_map.get(status, "Deploy Update")
+    lines = [
+        f"<b>{html.escape(title)}</b>",
+        f"target: <code>{html.escape(target.name)}</code>",
+        f"repo: <code>{html.escape(context['REPOSITORY'])}</code>",
+        f"branch: <code>{html.escape(context['BRANCH'])}</code>",
+        f"delivery: <code>{html.escape(context['DELIVERY_ID'] or '-')}</code>",
+    ]
+    if extra:
+        lines.append(html.escape(extra))
+    return "\n".join(lines)
+
+
 def run_target(target: DeploymentTarget, context: dict[str, str]) -> None:
     lock = get_target_lock(target.name)
     if not lock.acquire(blocking=False):
         logger.warning("target %s is already running", target.name)
         if target.notify:
-            send_bot_message(f"[deploy] skipped target={target.name} reason=already-running")
+            send_bot_message(format_bot_message("skipped", target, context, "reason: already running"))
         return
 
     try:
@@ -178,7 +204,7 @@ def run_target(target: DeploymentTarget, context: dict[str, str]) -> None:
         )
         logger.info(start_message)
         if target.notify:
-            send_bot_message(start_message)
+            send_bot_message(format_bot_message("start", target, context))
 
         for command in target.commands:
             logger.info("running target=%s command=%s", target.name, command)
@@ -198,7 +224,7 @@ def run_target(target: DeploymentTarget, context: dict[str, str]) -> None:
         done_message = f"[deploy] done target={target.name} delivery={context['DELIVERY_ID']}"
         logger.info(done_message)
         if target.notify:
-            send_bot_message(done_message)
+            send_bot_message(format_bot_message("done", target, context))
     except subprocess.CalledProcessError as exc:
         if exc.stdout:
             logger.error("target=%s stdout\n%s", target.name, exc.stdout.strip())
@@ -207,12 +233,12 @@ def run_target(target: DeploymentTarget, context: dict[str, str]) -> None:
         failed_message = f"[deploy] failed target={target.name} delivery={context['DELIVERY_ID']} exit={exc.returncode}"
         logger.exception(failed_message)
         if target.notify:
-            send_bot_message(failed_message)
+            send_bot_message(format_bot_message("failed", target, context, f"exit: {exc.returncode}"))
     except Exception as exc:
         failed_message = f"[deploy] failed target={target.name} delivery={context['DELIVERY_ID']} err={exc}"
         logger.exception(failed_message)
         if target.notify:
-            send_bot_message(failed_message)
+            send_bot_message(format_bot_message("failed", target, context, f"error: {exc}"))
     finally:
         lock.release()
 
