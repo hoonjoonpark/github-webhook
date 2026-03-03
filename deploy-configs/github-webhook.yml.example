@@ -1,4 +1,5 @@
 name: github-webhook-self
+display_name: GitHub Webhook
 repository: ${TARGET_REPOSITORY}
 branches:
   - ${TARGET_BRANCH}

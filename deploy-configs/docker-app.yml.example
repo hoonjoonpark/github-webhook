@@ -1,4 +1,5 @@
 name: sample-docker-app
+display_name: Sample Docker App
 repository: my-org/my-app
 branches:
   - main

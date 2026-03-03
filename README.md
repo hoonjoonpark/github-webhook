@@ -54,6 +54,7 @@ github app을 통해서 들어오는 global push event 핸들링.
 
 ```yaml
 name: github-webhook-self
+display_name: GitHub Webhook
 repository: my-org/github-webhook
 branches:
   - main
@@ -69,6 +70,7 @@ env: {}
 
 ```yaml
 name: sample-docker-app
+display_name: Sample Docker App
 repository: my-org/my-app
 branches:
   - main
@@ -117,3 +119,4 @@ WantedBy=multi-user.target
 - self-deploy 예시는 원격 working tree가 `/home/hjpark/github-webhook` 에 체크아웃되어 있다는 전제
 - `deploy-local-registry.sh` 는 host에서 실행된다는 전제이며, 대상 앱이 `docker-compose.yml` 을 사용하지 않으면 `RUN_COMPOSE=0` 으로 꺼둘 수 있음
 - `sudo systemctl restart github-webhook` 를 webhook 프로세스가 실행하려면 `hjpark` 에 대한 sudoers 설정이 필요할 수 있음
+- 알림용 서비스명을 바꾸려면 각 YAML에 `display_name` 을 추가하면 됨

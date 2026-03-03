@@ -39,6 +39,7 @@ _locks_guard = threading.Lock()
 @dataclass(slots=True)
 class DeploymentTarget:
     name: str
+    display_name: str
     repository: str
     branches: set[str]
     workdir: Path
@@ -125,6 +126,7 @@ def load_targets() -> list[DeploymentTarget]:
 
             workdir = Path(str(config.get("workdir", "."))).expanduser()
             target_name = str(config.get("name") or f"{path.stem}-{index + 1}")
+            display_name = str(config.get("display_name") or target_name)
             env = {
                 str(key): str(value)
                 for key, value in (config.get("env") or {}).items()
@@ -132,6 +134,7 @@ def load_targets() -> list[DeploymentTarget]:
             targets.append(
                 DeploymentTarget(
                     name=target_name,
+                    display_name=display_name,
                     repository=repository,
                     branches=branches,
                     workdir=workdir,
@@ -167,21 +170,22 @@ def format_bot_message(
     extra: str | None = None,
 ) -> str:
     title_map = {
-        "start": "Deploy Started",
-        "done": "Deploy Succeeded",
-        "failed": "Deploy Failed",
-        "skipped": "Deploy Skipped",
+        "start": "배포 시작",
+        "done": "배포 완료",
+        "failed": "배포 실패",
+        "skipped": "배포 건너뜀",
     }
     title = title_map.get(status, "Deploy Update")
     lines = [
         f"<b>{html.escape(title)}</b>",
-        f"target: <code>{html.escape(target.name)}</code>",
-        f"repo: <code>{html.escape(context['REPOSITORY'])}</code>",
-        f"branch: <code>{html.escape(context['BRANCH'])}</code>",
-        f"delivery: <code>{html.escape(context['DELIVERY_ID'] or '-')}</code>",
+        f"서비스: <b>{html.escape(target.display_name)}</b>",
+        f"타깃: <code>{html.escape(target.name)}</code>",
+        f"저장소: <code>{html.escape(context['REPOSITORY'])}</code>",
+        f"브랜치: <code>{html.escape(context['BRANCH'])}</code>",
+        f"전달 ID: <code>{html.escape(context['DELIVERY_ID'] or '-')}</code>",
     ]
     if extra:
-        lines.append(html.escape(extra))
+        lines.append(f"상세: <code>{html.escape(extra)}</code>")
     return "\n".join(lines)
 
 
@@ -253,6 +257,7 @@ def list_targets() -> JSONResponse:
     payload = [
         {
             "name": target.name,
+            "display_name": target.display_name,
             "repository": target.repository,
             "branches": sorted(target.branches),
             "workdir": str(target.workdir),
